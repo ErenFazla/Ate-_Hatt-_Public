@@ -1,8 +1,12 @@
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 public class HUDController : MonoBehaviour
 {
+    public static HUDController Instance { get; private set; }
+
     [Header("─── Üst HUD Metinleri ───")]
     [Tooltip("Altın miktarını gösteren text.\n" +
              "Format: 'GOLD: 150'")]
@@ -29,9 +33,32 @@ public class HUDController : MonoBehaviour
     [SerializeField]
     private PlayerHealth _playerHealth;
 
+    [Header("─── Boss UI ───")]
+    [SerializeField]
+    private GameObject bossWarningUI;
+
+    [SerializeField]
+    private Slider bossHealthSlider;
+
     private int _killCount;
 
     private int _lastDisplayedSecond = -1;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
+        if (bossWarningUI != null)
+            bossWarningUI.SetActive(false);
+
+        if (bossHealthSlider != null)
+            bossHealthSlider.gameObject.SetActive(false);
+    }
 
     private void Start()
     {
@@ -48,6 +75,9 @@ public class HUDController : MonoBehaviour
     private void OnDestroy()
     {
         UnsubscribeFromEvents();
+
+        if (Instance == this)
+            Instance = null;
     }
 
     private void SubscribeToEvents()
@@ -169,6 +199,47 @@ public class HUDController : MonoBehaviour
     }
 
     public int KillCount => _killCount;
+
+    // ── Boss UI ──
+
+    public IEnumerator ShowBossWarningRoutine(float duration)
+    {
+        if (bossWarningUI == null) yield break;
+
+        bossWarningUI.SetActive(true);
+        float elapsed = 0f;
+        bool visible = true;
+
+        while (elapsed < duration)
+        {
+            elapsed += 0.3f;
+            visible = !visible;
+            bossWarningUI.SetActive(visible);
+            yield return new WaitForSeconds(0.3f);
+        }
+
+        bossWarningUI.SetActive(false);
+    }
+
+    public void SetupBossHealthBar(float maxHp)
+    {
+        if (bossHealthSlider == null) return;
+        bossHealthSlider.gameObject.SetActive(true);
+        bossHealthSlider.maxValue = maxHp;
+        bossHealthSlider.value = maxHp;
+    }
+
+    public void UpdateBossHealthBar(float currentHp)
+    {
+        if (bossHealthSlider == null) return;
+        bossHealthSlider.value = Mathf.Max(0f, currentHp);
+    }
+
+    public void HideBossHealthBar()
+    {
+        if (bossHealthSlider == null) return;
+        bossHealthSlider.gameObject.SetActive(false);
+    }
 
     [System.Diagnostics.Conditional("UNITY_EDITOR"),
      System.Diagnostics.Conditional("DEVELOPMENT_BUILD")]

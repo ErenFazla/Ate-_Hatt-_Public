@@ -96,6 +96,9 @@ public class Boss : MonoBehaviour
                   $"Gold: {_goldReward} | BulletDmg: {_bulletDamage} | " +
                   $"BulletSpd: {_bulletSpeed:F1}");
         #endif
+
+        if (HUDController.Instance != null)
+            HUDController.Instance.SetupBossHealthBar(_maxHp);
     }
 
     private void HandleEntryPhase()
@@ -176,6 +179,9 @@ public class Boss : MonoBehaviour
     {
         _currentHp -= damage;
 
+        if (HUDController.Instance != null)
+            HUDController.Instance.UpdateBossHealthBar(_currentHp);
+
         if (_currentHp <= 0f)
         {
             _currentHp = 0f;
@@ -210,6 +216,9 @@ public class Boss : MonoBehaviour
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
         Debug.Log($"[Boss] Öldü! Gold: +{_goldReward}");
         #endif
+
+        if (HUDController.Instance != null)
+            HUDController.Instance.HideBossHealthBar();
 
         Destroy(gameObject);
     }

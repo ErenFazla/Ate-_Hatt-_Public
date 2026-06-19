@@ -52,6 +52,24 @@ public class Bullet : MonoBehaviour
         ReturnToPool();
     }
 
+    // ── Boss Çarpışma (düşmanlar CombatRelay ile halledilir, Boss ayrı) ──
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        Boss boss = other.GetComponent<Boss>();
+        if (boss == null || !boss.IsAlive) return;
+
+        float damage = CombatManager.Instance != null
+            ? CombatManager.Instance.BulletDamage
+            : 1f;
+
+        boss.TakeDamage(damage);
+
+        if (ParticleManager.Instance != null)
+            ParticleManager.Instance.PlaySpark(_cachedTransform.position, Color.yellow);
+
+        ReturnToPool();
+    }
+
     private void ReturnToPool()
     {
         if (!gameObject.activeSelf)

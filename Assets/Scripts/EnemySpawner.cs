@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Pool;
+using System.Collections;
 
 public class EnemySpawner : MonoBehaviour
 {
@@ -290,8 +291,25 @@ public class EnemySpawner : MonoBehaviour
         if (_bossTimer >= _bossInterval)
         {
             _bossTimer = 0f;
-            SpawnBoss();
+            _isBossFightActive = true;
+            StartCoroutine(SpawnBossSequence());
         }
+    }
+
+    private IEnumerator SpawnBossSequence()
+    {
+        if (HUDController.Instance != null)
+        {
+            yield return StartCoroutine(
+                HUDController.Instance.ShowBossWarningRoutine(3f)
+            );
+        }
+        else
+        {
+            yield return new WaitForSeconds(3f);
+        }
+
+        SpawnBoss();
     }
 
     private void SpawnBoss()
