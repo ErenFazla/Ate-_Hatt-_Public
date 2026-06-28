@@ -200,8 +200,6 @@ public class HUDController : MonoBehaviour
 
     public int KillCount => _killCount;
 
-    // ── Boss UI ──
-
     public IEnumerator ShowBossWarningRoutine(float duration)
     {
         if (bossWarningUI == null) yield break;
